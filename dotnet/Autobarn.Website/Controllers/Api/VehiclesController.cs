@@ -1,6 +1,7 @@
 using Autobarn.Data;
 using Autobarn.Data.Entities;
 using Autobarn.Website.Models;
+using EasyNetQ;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -8,16 +9,19 @@ using System.Collections.Generic;
 using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Net;
+using Autobarn.Messages;
 
-namespace Autobarn.Website.Controllers.Api; 
+namespace Autobarn.Website.Controllers.Api;
 
 [Route("api/[controller]")]
 [ApiController]
 public class VehiclesController : ControllerBase {
 	private readonly IAutobarnDatabase db;
+	private readonly IPubSub pubsub;
 
-	public VehiclesController(IAutobarnDatabase db) {
+	public VehiclesController(IAutobarnDatabase db, IPubSub pubsub) {
 		this.db = db;
+		this.pubsub = pubsub;
 	}
 
 	private const int PAGE_SIZE = 10;
@@ -42,7 +46,6 @@ public class VehiclesController : ControllerBase {
 		};
 		return Ok(response);
 	}
-		
 
 	[HttpGet("{id}")]
 	public Vehicle Get(string id)
@@ -75,7 +78,11 @@ public class VehiclesController : ControllerBase {
 			Year = dto.Year,
 			VehicleModel = vehicleModel
 		};
+
+		PublishNewVehicleNotification(vehicle);
+		// PROBLEM HERE.
 		db.CreateVehicle(vehicle);
+
 		return Created($"/api/vehicles/{dto.Registration}", vehicle);
 	}
 
@@ -99,5 +106,17 @@ public class VehiclesController : ControllerBase {
 		if (vehicle == default) return NotFound();
 		db.DeleteVehicle(vehicle);
 		return NoContent();
+	}
+
+	void PublishNewVehicleNotification(Vehicle vehicle) {
+		var message = new NewVehicleMessage {
+			Registration = vehicle.Registration,
+			Color = vehicle.Color,
+			ListedAt = DateTimeOffset.UtcNow,
+			Make = vehicle?.VehicleModel?.Manufacturer?.Name ?? "missing!",
+			Model = vehicle?.VehicleModel?.Name ?? "missing!",
+			Year = vehicle.Year
+		};
+		pubsub.Publish(message);
 	}
 }

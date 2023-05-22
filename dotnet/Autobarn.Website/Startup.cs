@@ -1,4 +1,5 @@
 using Autobarn.Data;
+using EasyNetQ;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -22,6 +23,10 @@ public class Startup {
 		services.AddRouting(options => options.LowercaseUrls = true);
 		services.AddControllersWithViews().AddNewtonsoftJson();
 
+		var amqp = Configuration.GetConnectionString("RabbitMQ");
+		var bus = RabbitHutch.CreateBus(amqp);
+
+		services.AddSingleton(bus.PubSub);
 		services.AddSwaggerGen();
 		services.AddSwaggerGenNewtonsoftSupport();
 
