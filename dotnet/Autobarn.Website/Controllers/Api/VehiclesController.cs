@@ -1,8 +1,12 @@
 using Autobarn.Data;
 using Autobarn.Data.Entities;
 using Autobarn.Website.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
+using System.Net;
 
 namespace Autobarn.Website.Controllers.Api; 
 
@@ -22,10 +26,17 @@ public class VehiclesController : ControllerBase {
 
 	[HttpGet("{id}")]
 	public Vehicle Get(string id)
-		=> db.FindVehicle(id);
+	=> db.FindVehicle(id);
 
 	// POST api/vehicles
 	[HttpPost]
+	[ProducesResponseType(StatusCodes.Status201Created, Type = typeof(Vehicle))]
+
+	// Swagger generates one response per code
+	// The last one wins, and if you want an empty response body,
+	// you have to use the typeof(void) as the first parameter.
+	// [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(void))]
+	[ProducesResponseType(typeof(void), StatusCodes.Status409Conflict)]
 	public IActionResult Post([FromBody] VehicleDto dto) {
 		if (dto.ModelCode == null)
 			return BadRequest("Sorry, null model codes are not supported.");
@@ -33,6 +44,11 @@ public class VehiclesController : ControllerBase {
 		if (vehicleModel == default) {
 			return BadRequest($"Sorry, we couldn't find a vehicle model matching {dto.ModelCode}");
 		}
+
+		var existing = db.FindVehicle(dto.Registration);
+		if (existing != default)
+			return Conflict(
+				$"Sorry, the registration {dto.Registration} already exists in our database and you can't sell the same car twice!");
 		var vehicle = new Vehicle {
 			Registration = dto.Registration,
 			Color = dto.Color,
@@ -40,7 +56,7 @@ public class VehiclesController : ControllerBase {
 			VehicleModel = vehicleModel
 		};
 		db.CreateVehicle(vehicle);
-		return Ok(vehicle);
+		return Created($"/api/vehicles/{dto.Registration}", vehicle);
 	}
 
 	[HttpPut("{id}")]
