@@ -8,8 +8,7 @@ var subscriptionId = "dylan-delete-queue";
 
 var sub = bus.PubSub.Subscribe<Greeting>(
     subscriptionId, 
-    HandleGreeting, 
-    options => options.WithAutoDelete()
+    HandleGreeting    
 );
 
 Console.WriteLine("Listening for messages. Press Enter to exit.");
