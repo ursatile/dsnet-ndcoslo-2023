@@ -8,5 +8,5 @@ public class NewVehicleMessage {
 	public int? Year { get; set; }
 	public string? Color { get; set; }
 	public override string ToString()
-		=> $"{Registration} {Make} {Model} ({Color}, {Year} at {ListedAt}";
+		=> $"{Registration} {Make} {Model} ({Color}, {Year} at {ListedAt}";		
 }
