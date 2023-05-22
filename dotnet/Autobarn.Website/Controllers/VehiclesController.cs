@@ -1,15 +1,20 @@
 using Autobarn.Data;
 using Autobarn.Data.Entities;
+using Autobarn.Messages;
 using Autobarn.Website.Models;
+using EasyNetQ;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace Autobarn.Website.Controllers; 
 
 public class VehiclesController : Controller {
 	private readonly IAutobarnDatabase db;
+	private readonly IPubSub pubSub;
 
-	public VehiclesController(IAutobarnDatabase db) {
+	public VehiclesController(IAutobarnDatabase db, IPubSub pubSub) {
 		this.db = db;
+		this.pubSub = pubSub;
 	}
 	public IActionResult Index() {
 		var vehicles = db.ListVehicles();
@@ -49,7 +54,20 @@ public class VehiclesController : Controller {
 			VehicleModel = vehicleModel,
 			Year = dto.Year
 		};
+		PublishNewVehicleNotification(vehicle);
 		db.CreateVehicle(vehicle);
 		return RedirectToAction("Details", new { id = vehicle.Registration });
+	}
+
+	void PublishNewVehicleNotification(Vehicle vehicle) {
+		var message = new NewVehicleMessage {
+			Registration = vehicle.Registration,
+			Color = vehicle.Color,
+			ListedAt = DateTimeOffset.UtcNow,
+			Make = vehicle?.VehicleModel?.Manufacturer?.Name ?? "missing!",
+			Model = vehicle?.VehicleModel?.Name ?? "missing!",
+			Year = vehicle.Year
+		};
+		pubSub.Publish(message);
 	}
 }
