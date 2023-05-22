@@ -21,6 +21,10 @@ public class Startup {
 	public void ConfigureServices(IServiceCollection services) {
 		services.AddRouting(options => options.LowercaseUrls = true);
 		services.AddControllersWithViews().AddNewtonsoftJson();
+
+		services.AddSwaggerGen();
+		services.AddSwaggerGenNewtonsoftSupport();
+
 		services.AddRazorPages().AddRazorRuntimeCompilation();
 		Console.WriteLine(DatabaseMode);
 		switch (DatabaseMode) {
@@ -47,6 +51,12 @@ public class Startup {
 		app.UseStaticFiles();
 		app.UseRouting();
 		app.UseAuthorization();
+
+		// Add endpoints for exposing the Swagger JSON document describing our API:
+		app.UseSwagger();
+		// ...and the SwaggerUI interactive API tooling.
+		app.UseSwaggerUI();
+
 		app.UseEndpoints(endpoints => {
 			endpoints.MapControllerRoute(
 				name: "default",
