@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
+using System.Linq;
 using System.Net;
 
 namespace Autobarn.Website.Controllers.Api; 
@@ -19,14 +20,33 @@ public class VehiclesController : ControllerBase {
 		this.db = db;
 	}
 
+	private const int PAGE_SIZE = 10;
 	// GET: api/vehicles
 	[HttpGet]
-	public IEnumerable<Vehicle> Get()
-		=> db.ListVehicles();
+	public IActionResult Get(int index = 0) {
+		var items = db.ListVehicles().Skip(index).Take(PAGE_SIZE);
+		var total = db.CountVehicles();
+		var response = new {
+			_links = new {
+				self = new {
+					href = $"/api/vehicles?index={index}"
+				},
+				next = new {
+					href = $"/api/vehicles?index={index + PAGE_SIZE}"
+				}
+			},
+			index,
+			count = PAGE_SIZE,
+			total,
+			items
+		};
+		return Ok(response);
+	}
+		
 
 	[HttpGet("{id}")]
 	public Vehicle Get(string id)
-	=> db.FindVehicle(id);
+		=> db.FindVehicle(id);
 
 	// POST api/vehicles
 	[HttpPost]
