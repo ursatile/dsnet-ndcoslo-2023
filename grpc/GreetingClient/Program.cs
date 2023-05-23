@@ -21,7 +21,8 @@ while(true) {
     };
     var request = new HelloRequest {
         LanguageCode = languageCode,
-        Name = "NDC Oslo"
+        FirstName = "Bobson",
+        LastName = "Dugnutt"    
     };
     var reply = await client.SayHelloAsync(request);
     Console.WriteLine(reply);    

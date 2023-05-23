@@ -10,19 +10,23 @@ public class GreeterService : Greeter.GreeterBase {
 	}
 
 	public override Task<HelloReply> SayHello(HelloRequest request, ServerCallContext context) {
+        
+        var name = $"{request.LastName.ToUpperInvariant()}, {request.FirstName}";
+        
         var greeting = request.LanguageCode switch {
-            "nn-NO" => $"Hei {request.Name}",
-            "en-GB" => $"Good morning, {request.Name}",
-            "en-US" => $"Howdy, {request.Name}",
-            "en-AU" => $"G'day, {request.Name}!",
-            "is-IS" => $"Halló {request.Name}",
-            "it-IT" => $"Buongiorno  {request.Name}",
-            "ja-JP" => $"こんにちわ {request.Name}",
-            "ko-KO" => $"안녕하세요 {request.Name}",
-            _ => $"Greeting, {request.Name}"
+            "nn-NO" => $"Hei {name}",
+            "en-GB" => $"Good morning, {name}",
+            "en-US" => $"Howdy, {name}",
+            "en-AU" => $"G'day, {name}!",
+            "is-IS" => $"Halló {name}",
+            "it-IT" => $"Buongiorno  {name}",
+            "ja-JP" => $"こんにちわ {name}",
+            "ko-KO" => $"안녕하세요 {name}",
+            _ => $"Greeting, {name}"
         };
 
 		_logger.LogDebug("Received a HelloRequest");
+        _logger.LogDebug($"It's from {name}");
 		return Task.FromResult(new HelloReply {
 			Message = greeting,
             From = "Dylan's gRPC Server"
