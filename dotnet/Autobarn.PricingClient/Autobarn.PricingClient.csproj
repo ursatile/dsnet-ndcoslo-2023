@@ -9,6 +9,12 @@
 
   <ItemGroup>
     <PackageReference Include="EasyNetQ" Version="7.5.2" />
+    <PackageReference Include="Google.ProtoBuf" Version="3.23.1" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.53.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.54.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>

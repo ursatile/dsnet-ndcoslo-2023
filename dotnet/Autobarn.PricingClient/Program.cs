@@ -1,4 +1,4 @@
-using Autobarn.AuditLog;
+using Autobarn.PricingClient;
 using EasyNetQ;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,11 +11,11 @@ var builder = Host.CreateDefaultBuilder()
 		logging.AddConsole();
 	})
 .ConfigureServices((context, services) => {
-		var amqp = context.Configuration.GetConnectionString("RabbitMQ");
-		var bus = RabbitHutch.CreateBus(amqp);
-		services.AddSingleton(bus.PubSub);
-		services.AddHostedService<AuditLogService>();
-	});
+	var amqp = context.Configuration.GetConnectionString("RabbitMQ");
+	var bus = RabbitHutch.CreateBus(amqp);
+	services.AddSingleton(bus.PubSub);
+	services.AddHostedService<PricingClientService>();
+});
 
 var host = builder.Build();
 await host.RunAsync();
