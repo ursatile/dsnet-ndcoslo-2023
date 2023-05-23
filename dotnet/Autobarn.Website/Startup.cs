@@ -6,8 +6,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
+using Autobarn.Website.GraphQL.GraphTypes;
+using Autobarn.Website.GraphQL.Schemas;
+using GraphiQl;
+using GraphQL;
 
-namespace Autobarn.Website; 
+namespace Autobarn.Website;
 
 public class Startup {
 	protected virtual string DatabaseMode => Configuration["DatabaseMode"];
@@ -29,6 +33,11 @@ public class Startup {
 		services.AddSingleton(bus.PubSub);
 		services.AddSwaggerGen();
 		services.AddSwaggerGenNewtonsoftSupport();
+
+		services.AddGraphQL(builder =>
+			builder.AddNewtonsoftJson()
+				.AddSchema<AutobarnSchema>()
+				.AddGraphTypes(typeof(VehicleGraphType).Assembly));
 
 		services.AddRazorPages().AddRazorRuntimeCompilation();
 		Console.WriteLine(DatabaseMode);
@@ -61,6 +70,9 @@ public class Startup {
 		app.UseSwagger();
 		// ...and the SwaggerUI interactive API tooling.
 		app.UseSwaggerUI();
+
+		app.UseGraphQL<AutobarnSchema>();
+		app.UseGraphiQl("/graphiql");
 
 		app.UseEndpoints(endpoints => {
 			endpoints.MapControllerRoute(
