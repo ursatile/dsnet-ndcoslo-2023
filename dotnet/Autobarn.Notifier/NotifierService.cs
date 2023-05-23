@@ -1,10 +1,9 @@
-using System.Security;
+using Autobarn.Messages;
 using EasyNetQ;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Autobarn.Messages;
 
-namespace Autobarn.AuditLog;
+namespace Autobarn.Notifier;
 
 public class NotifierService : IHostedService {
 	private readonly string subscriptionId = $"autobarn.notifier";

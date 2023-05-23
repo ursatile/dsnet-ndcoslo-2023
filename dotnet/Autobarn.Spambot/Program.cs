@@ -1,4 +1,4 @@
-using Autobarn.Notifier;
+using Autobarn.Spambot;
 using EasyNetQ;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,8 +13,11 @@ var builder = Host.CreateDefaultBuilder()
 .ConfigureServices((context, services) => {
 		var amqp = context.Configuration.GetConnectionString("RabbitMQ");
 		var bus = RabbitHutch.CreateBus(amqp);
+		var db = new FakeCustomerDatabase();
+		services.AddSingleton<ICustomerDatabase>(db);
+		services.AddSingleton<IMailSender, SmtpMailSender>();
 		services.AddSingleton(bus.PubSub);
-		services.AddHostedService<NotifierService>();
+		services.AddHostedService<SpambotService>();
 	});
 
 var host = builder.Build();
