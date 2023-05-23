@@ -36,6 +36,8 @@ public class PricingClientService : IHostedService {
 		};
 		var reply = await grpcClient.GetPriceAsync(priceRequest);
 		logger.LogInformation($"{reply.Price} {reply.CurrencyCode}");
+		var priceMessage = message.WithPrice(reply.Price, reply.CurrencyCode);
+		await pubSub.PublishAsync(priceMessage);
 	}
 
 	public Task StopAsync(CancellationToken cancellationToken) {
