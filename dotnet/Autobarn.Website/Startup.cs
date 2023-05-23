@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using System;
 using Autobarn.Website.GraphQL.GraphTypes;
 using Autobarn.Website.GraphQL.Schemas;
+using Autobarn.Website.Hubs;
 using GraphiQl;
 using GraphQL;
 
@@ -39,6 +40,7 @@ public class Startup {
 				.AddSchema<AutobarnSchema>()
 				.AddGraphTypes(typeof(VehicleGraphType).Assembly));
 
+		services.AddSignalR();
 		services.AddRazorPages().AddRazorRuntimeCompilation();
 		Console.WriteLine(DatabaseMode);
 		switch (DatabaseMode) {
@@ -75,6 +77,7 @@ public class Startup {
 		app.UseGraphiQl("/graphiql");
 
 		app.UseEndpoints(endpoints => {
+			endpoints.MapHub<AutobarnHub>("/hub");
 			endpoints.MapControllerRoute(
 				name: "default",
 				pattern: "{controller=Home}/{action=Index}/{id?}");
